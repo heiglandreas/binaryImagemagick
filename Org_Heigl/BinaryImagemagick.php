@@ -464,7 +464,13 @@ class BinaryImagemagick extends WP_Image_Editor
      */
     public function stream($mime_type = null)
     {
-        list( $filename, $extension, $mime_type ) = $this->get_output_format( null, $mime_type );
+        // Removes bug introduced by MediaLibraryAssistant
+        // Due to the here removed filter the convert tries to create a "jpe"
+        // file which it doesn't know about.
+        if (has_filter('mime_types', 'MLAMime::mla_mime_types_filter')) {
+            remove_filter('mime_types', 'MLAMime::mla_mime_types_filter', 0x7FFFFFFF);
+        }
+        list( $filename, $extension, $mime_type ) = $this->get_output_format(null, $mime_type );
 
         header( "Content-Type: $mime_type" );
         error_log(self::$convert . ' "' . $this->file . '" ' . $this->getOptionString() . ' ' .  $extension . ':-'  );
